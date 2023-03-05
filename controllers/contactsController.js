@@ -1,14 +1,14 @@
 import { controllerWrapper, HttpError } from "../helpers/index.js";
-import model from "../models/contacts.js";
+import { Contact } from "../models/contacts.js";
 
 const getAll = async (req, res) => {
-    const result = await model.listContacts();
+    const result = await Contact.find({});
     res.json(result);
 };
 
 const getById = async (req, res) => {
     const { id } = req.params;
-    const result = await model.getContactById(id);
+    const result = await Contact.findById(id);
     if (!result) {
         throw HttpError(404, "Contact not found");
     }
@@ -16,13 +16,13 @@ const getById = async (req, res) => {
 };
 
 const addNew = async (req, res) => {
-    const result = await model.addContact(req.body);
+    const result = await Contact.create(req.body);
     res.status(201).json(result);
 };
 
 const removeById = async (req, res) => {
     const { id } = req.params;
-    const result = await model.removeContact(id);
+    const result = await Contact.findByIdAndRemove(id);
     if (!result) {
         throw HttpError(422, `Contact with id ${id} not found`);
     }
@@ -31,7 +31,18 @@ const removeById = async (req, res) => {
 
 const updateById = async (req, res) => {
     const { id } = req.params;
-    const result = await model.updateContact(id, req.body);
+    const result = await Contact.findByIdAndUpdate(id, req.body, { new: true });
+    if (!result) {
+        throw HttpError(422, `Contact with id ${id} not found`);
+    }
+    res.status(200).json(result);
+};
+
+const updateFavorite = async (req, res) => {
+    const { id } = req.params;
+    const { favorite } = req.body;
+
+    const result = await Contact.findByIdAndUpdate(id, { favorite }, { new: true });
     if (!result) {
         throw HttpError(422, `Contact with id ${id} not found`);
     }
@@ -44,4 +55,5 @@ export default {
     addNew: controllerWrapper(addNew),
     removeById: controllerWrapper(removeById),
     updateById: controllerWrapper(updateById),
+    updateFavorite: controllerWrapper(updateFavorite),
 };

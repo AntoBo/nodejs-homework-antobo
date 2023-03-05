@@ -2,11 +2,14 @@ import express from "express";
 import morgan from "morgan";
 import cors from "cors";
 import contactsRouter from "./routes/api/contacts.js";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const app = express();
-const formatsLogger = app.get("env") === "development" ? "dev" : "short";
+// const formatsLogger = app.get("env") === "development" ? "dev" : "short";
+// app.use(morgan(formatsLogger));
 
-app.use(morgan(formatsLogger));
 app.use(cors());
 app.use(express.json());
 
@@ -20,9 +23,8 @@ app.use((req, res) => {
 
 // ERROR ROUTER
 app.use((err, req, res, next) => {
-    console.log("ERROR USE ", err);
-    const { status, message } = err;
-    res.status(500).json({ message });
+    const { status = 500, message } = err;
+    res.status(status).json({ message });
 });
 
 export default app;
