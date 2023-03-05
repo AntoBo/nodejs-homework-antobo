@@ -2,7 +2,9 @@ import { controllerWrapper, HttpError } from "../helpers/index.js";
 import { Contact } from "../models/contacts.js";
 
 const getAll = async (req, res) => {
-    const result = await Contact.find({});
+    const { _id } = req.user;
+
+    const result = await Contact.find({ owner: _id });
     res.json(result);
 };
 
@@ -16,7 +18,9 @@ const getById = async (req, res) => {
 };
 
 const addNew = async (req, res) => {
-    const result = await Contact.create(req.body);
+    const { _id } = req.user;
+
+    const result = await Contact.create({ ...req.body, owner: _id });
     res.status(201).json(result);
 };
 

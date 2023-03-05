@@ -2,6 +2,7 @@ import express from "express";
 import morgan from "morgan";
 import cors from "cors";
 import contactsRouter from "./routes/api/contacts.js";
+import authRouter from "./routes/api/auth.js";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -13,10 +14,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// CONTACTS ROUTER
+// ROUTS
 app.use("/api/contacts", contactsRouter);
+app.use("/api/users", authRouter);
 
-// 404 ROUTER
+// 404 ROUTE
 app.use((req, res) => {
     res.status(404).json({ message: "Not found" });
 });

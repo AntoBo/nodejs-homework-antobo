@@ -3,8 +3,11 @@ import controller from "../../controllers/contactsController.js";
 import { validateBody } from "../../middlewares/validateWrapper.js";
 import isValidId from "../../middlewares/validators/isValidId.js";
 import contactsSchemas from "../../middlewares/validators/contactsSchemas.js";
+import auth from "../../middlewares/auth.js";
 
 const router = express.Router();
+
+router.use(auth);
 
 router.get("/", controller.getAll);
 
