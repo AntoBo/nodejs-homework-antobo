@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { controllerWrapper, HttpError } from "../helpers/index.js";
-import { User } from "../models/users.js";
+import { User } from "../models/index.js";
 
 import dotenv from "dotenv";
 dotenv.config();
