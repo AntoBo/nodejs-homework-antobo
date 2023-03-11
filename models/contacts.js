@@ -1,6 +1,5 @@
-import { Schema, model } from "mongoose";
-import Joi from "joi";
-import handleMongooseError from "../helpers/handleMongooseError.js";
+import { Schema, model, SchemaTypes } from "mongoose";
+import { handleMongooseError } from "../helpers/index.js";
 
 const contactsSchema = new Schema(
     {
@@ -18,6 +17,10 @@ const contactsSchema = new Schema(
         favorite: {
             type: Boolean,
             default: false,
+        },
+        owner: {
+            type: SchemaTypes.ObjectId,
+            ref: "user",
         },
     },
     { versionKey: false, timestamps: true }
