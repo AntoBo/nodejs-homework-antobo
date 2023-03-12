@@ -78,7 +78,7 @@ const current = async (req, res) => {
 
 const updateAvatar = async (req, res) => {
     if (!req.file) {
-        throw HttpError(409, "File is not sent");
+        throw HttpError(409, "File is not attached");
     }
 
     const { _id } = req.user;
@@ -89,7 +89,7 @@ const updateAvatar = async (req, res) => {
     await Jimp.read(tempUpload)
         .then((lenna) => {
             return lenna
-                .resize(256, 256) // resize
+                .resize(250, 250) // resize
                 .quality(60) // set JPEG quality
                 .greyscale() // set greyscale
                 .write(resultUpload); // save
