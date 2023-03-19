@@ -6,10 +6,13 @@ import { authSchemas } from "../../middlewares/validators/index.js";
 
 const router = express.Router();
 
+//prefix /api/users
 router.post("/signup", validateBody(authSchemas.signup), controller.signup);
 router.post("/login", validateBody(authSchemas.login), controller.login);
 router.get("/logout", auth, controller.logout);
 router.get("/current", auth, controller.current);
 router.patch("/avatars", auth, upload.single("avatar"), controller.updateAvatar);
+router.get("/verify/:verificationToken", controller.verifyEmail);
+router.post("/verify/resend", controller.verifyEmailResend);
 
 export default router;

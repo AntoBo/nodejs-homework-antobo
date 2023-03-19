@@ -5,9 +5,10 @@ import path from "path";
 import fs from "fs/promises";
 import dotenv from "dotenv";
 import Jimp from "jimp";
-import { controllerWrapper, HttpError } from "../helpers/index.js";
+import { controllerWrapper, HttpError, emails } from "../helpers/index.js";
 import { User } from "../models/index.js";
 import { fileURLToPath } from "url";
+import { nanoid } from "nanoid";
 dotenv.config();
 
 const { SECRET_KEY } = process.env;
@@ -25,8 +26,11 @@ const signup = async (req, res) => {
 
     const hashPassword = await bcrypt.hash(password, 10);
     const avatarURL = gravatar.url(email);
+    const verificationToken = nanoid();
 
-    const newUser = await User.create({ ...req.body, password: hashPassword, avatarURL });
+    const newUser = await User.create({ ...req.body, password: hashPassword, avatarURL, verificationToken });
+
+    emails.sendVerifyEmail({ email, verificationToken });
 
     res.status(201).json({
         email: newUser.email,
@@ -39,13 +43,17 @@ const login = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-        throw HttpError(401, "Email or password invalid");
+        throw HttpError(401, "Email or password is invalid");
+    }
+
+    if (!user.verified) {
+        throw HttpError(401, "Email is not verified");
     }
 
     const passwordCompare = await bcrypt.compare(password, user.password);
 
     if (!passwordCompare) {
-        throw HttpError(401, "Email or password invalid");
+        throw HttpError(401, "Email or password is invalid");
     }
 
     const payload = {
@@ -107,10 +115,47 @@ const updateAvatar = async (req, res) => {
     });
 };
 
+const verifyEmail = async (req, res) => {
+    const { verificationToken } = req.params;
+    const user = await User.findOne({ verificationToken });
+
+    if (!user) {
+        throw HttpError(404, "User not found");
+    }
+
+    await User.findByIdAndUpdate(user._id, { verified: true, verificationToken: "" });
+
+    res.json({
+        message: "Verification successful",
+    });
+};
+
+const verifyEmailResend = async (req, res) => {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+        throw HttpError(404, "Email not found");
+    }
+    if (user.verified) {
+        throw HttpError(401, "Email is already verified");
+    }
+
+    const verificationToken = nanoid();
+    await User.findByIdAndUpdate(user._id, { verificationToken });
+
+    emails.sendVerifyEmail({ email, verificationToken });
+
+    res.json({
+        message: "Verification email was resent",
+    });
+};
+
 export default {
     signup: controllerWrapper(signup),
     login: controllerWrapper(login),
     logout: controllerWrapper(logout),
     current: controllerWrapper(current),
     updateAvatar: controllerWrapper(updateAvatar),
+    verifyEmail: controllerWrapper(verifyEmail),
+    verifyEmailResend: controllerWrapper(verifyEmailResend),
 };
